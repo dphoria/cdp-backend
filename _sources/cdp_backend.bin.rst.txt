@@ -4,6 +4,14 @@ cdp\_backend.bin package
 Submodules
 ----------
 
+cdp\_backend.bin.add\_content\_hash\_to\_sessions module
+--------------------------------------------------------
+
+.. automodule:: cdp_backend.bin.add_content_hash_to_sessions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 cdp\_backend.bin.clean\_cdp\_database module
 --------------------------------------------
 
@@ -52,6 +60,22 @@ cdp\_backend.bin.create\_cdp\_transcript\_model\_doc module
    :undoc-members:
    :show-inheritance:
 
+cdp\_backend.bin.get\_cdp\_infrastructure\_stack module
+-------------------------------------------------------
+
+.. automodule:: cdp_backend.bin.get_cdp_infrastructure_stack
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cdp\_backend.bin.process\_cdp\_event\_index\_chunk module
+---------------------------------------------------------
+
+.. automodule:: cdp_backend.bin.process_cdp_event_index_chunk
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 cdp\_backend.bin.process\_special\_event module
 -----------------------------------------------
 
@@ -68,10 +92,10 @@ cdp\_backend.bin.run\_cdp\_event\_gather module
    :undoc-members:
    :show-inheritance:
 
-cdp\_backend.bin.run\_cdp\_event\_index module
-----------------------------------------------
+cdp\_backend.bin.run\_cdp\_event\_index\_generation module
+----------------------------------------------------------
 
-.. automodule:: cdp_backend.bin.run_cdp_event_index
+.. automodule:: cdp_backend.bin.run_cdp_event_index_generation
    :members:
    :undoc-members:
    :show-inheritance:
@@ -80,6 +104,14 @@ cdp\_backend.bin.search\_cdp\_events module
 -------------------------------------------
 
 .. automodule:: cdp_backend.bin.search_cdp_events
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cdp\_backend.bin.store\_cdp\_metadata\_document module
+------------------------------------------------------
+
+.. automodule:: cdp_backend.bin.store_cdp_metadata_document
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,124 +1,219 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>cdp_backend.pipeline.event_gather_pipeline &mdash; cdp-backend 3.0.3 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" /> 
-</head>
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> cdp-backend
-          </a>
-              <div class="version">
-                3.0.3
-              </div>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+    <meta name="generator" content="sphinx-5.1.1, furo 2022.06.21"/>
+        <title>cdp_backend.pipeline.event_gather_pipeline - cdp-backend 0.1.dev1+g9028d52 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">cdp-backend 0.1.dev1+g9028d52 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">cdp-backend 0.1.dev1+g9028d52 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../installation.html#stable-release">Stable release</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../installation.html#from-sources">From sources</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Package Modules</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../cdp_backend.html">cdp_backend package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../cdp_backend.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../cdp_backend.bin.html">cdp_backend.bin package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../cdp_backend.database.html">cdp_backend.database package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../cdp_backend.file_store.html">cdp_backend.file_store package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../cdp_backend.infrastructure.html">cdp_backend.infrastructure package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../cdp_backend.pipeline.html">cdp_backend.pipeline package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../cdp_backend.sr_models.html">cdp_backend.sr_models package</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../cdp_backend.utils.html">cdp_backend.utils package</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../cdp_backend.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../cdp_backend.html#module-cdp_backend.version">cdp_backend.version module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../cdp_backend.html#module-cdp_backend">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../modules.html">Package Modules</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../cdp_backend.html">cdp_backend package</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../cdp_backend.annotation.html">cdp_backend.annotation package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../cdp_backend.bin.html">cdp_backend.bin package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../cdp_backend.database.html">cdp_backend.database package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../cdp_backend.file_store.html">cdp_backend.file_store package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../cdp_backend.infrastructure.html">cdp_backend.infrastructure package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../cdp_backend.pipeline.html">cdp_backend.pipeline package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../cdp_backend.sr_models.html">cdp_backend.sr_models package</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../cdp_backend.utils.html">cdp_backend.utils package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../cdp_backend.utils.resources.html">cdp_backend.utils.resources package</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../ingestion_models.html">Ingestion Models</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../ingestion_models.html#updating-existing-database-documents">Updating Existing Database Documents</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../ingestion_models.html#minimal-event-data">Minimal Event Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../ingestion_models.html#expanded-event-data-with-event-minutes-items">Expanded Event Data with Event Minutes Items</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../event_gather_pipeline.html">Event Gather Pipeline</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../event_gather_pipeline.html#minimal-event-processing">Minimal Event Processing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../event_gather_pipeline.html#filled-event-processing">Filled Event Processing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../event_gather_pipeline.html#workflow-management-and-parallel-processing">Workflow Management and Parallel Processing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../event_gather_pipeline.html#pipeline-configuration">Pipeline Configuration</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../database_schema.html">Database Schema</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../database_schema.html#notes">Notes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../database_schema.html#implementation">Implementation</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../transcript_model.html">Transcript Model</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../transcript_model.html#example-transcript">Example Transcript</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#developer-installation">Developer Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#get-started">Get Started!</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../contributing.html#deploying">Deploying</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ingestion_models.html">Ingestion Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../event_gather_pipeline.html">Event Gather Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../database_schema.html">Database Schema</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../transcript_model.html">Transcript Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
 </ul>
 
-        </div>
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">cdp-backend</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>cdp_backend.pipeline.event_gather_pipeline</li>
-      <li class="wy-breadcrumbs-aside">
-      </li>
-  </ul>
-  <hr/>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <h1>Source code for cdp_backend.pipeline.event_gather_pipeline</h1><div class="highlight"><pre>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for cdp_backend.pipeline.event_gather_pipeline</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 <span class="c1"># -*- coding: utf-8 -*-</span>
 
@@ -131,19 +226,19 @@
 
 <span class="kn">from</span> <span class="nn">aiohttp.client_exceptions</span> <span class="kn">import</span> <span class="n">ClientResponseError</span>
 <span class="kn">from</span> <span class="nn">fireo.fields.errors</span> <span class="kn">import</span> <span class="n">FieldValidationFailed</span><span class="p">,</span> <span class="n">InvalidFieldType</span><span class="p">,</span> <span class="n">RequiredField</span>
-<span class="kn">from</span> <span class="nn">fsspec.core</span> <span class="kn">import</span> <span class="n">url_to_fs</span>
 <span class="kn">from</span> <span class="nn">gcsfs</span> <span class="kn">import</span> <span class="n">GCSFileSystem</span>
 <span class="kn">from</span> <span class="nn">prefect</span> <span class="kn">import</span> <span class="n">Flow</span><span class="p">,</span> <span class="n">task</span>
 <span class="kn">from</span> <span class="nn">prefect.tasks.control_flow</span> <span class="kn">import</span> <span class="n">case</span><span class="p">,</span> <span class="n">merge</span>
+<span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="ne">ConnectionError</span>
 
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">__version__</span>
 <span class="kn">from</span> <span class="nn">..database</span> <span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">db_constants</span>
 <span class="kn">from</span> <span class="nn">..database</span> <span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">db_functions</span>
 <span class="kn">from</span> <span class="nn">..database</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">db_models</span>
-<span class="kn">from</span> <span class="nn">..database.validators</span> <span class="kn">import</span> <span class="n">resource_exists</span>
+<span class="kn">from</span> <span class="nn">..database.validators</span> <span class="kn">import</span> <span class="n">is_secure_uri</span><span class="p">,</span> <span class="n">resource_exists</span><span class="p">,</span> <span class="n">try_url</span>
 <span class="kn">from</span> <span class="nn">..file_store</span> <span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">fs_functions</span>
 <span class="kn">from</span> <span class="nn">..sr_models</span> <span class="kn">import</span> <span class="n">GoogleCloudSRModel</span><span class="p">,</span> <span class="n">WebVTTSRModel</span>
 <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">constants_utils</span><span class="p">,</span> <span class="n">file_utils</span>
-<span class="kn">from</span> <span class="nn">..version</span> <span class="kn">import</span> <span class="n">__version__</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">ingestion_models</span>
 <span class="kn">from</span> <span class="nn">.ingestion_models</span> <span class="kn">import</span> <span class="n">EventIngestionModel</span><span class="p">,</span> <span class="n">Session</span>
 <span class="kn">from</span> <span class="nn">.pipeline_config</span> <span class="kn">import</span> <span class="n">EventGatherPipelineConfig</span>
@@ -159,6 +254,7 @@
 <div class="viewcode-block" id="SessionProcessingResult"><a class="viewcode-back" href="../../../cdp_backend.pipeline.html#cdp_backend.pipeline.event_gather_pipeline.SessionProcessingResult">[docs]</a><span class="k">class</span> <span class="nc">SessionProcessingResult</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
     <span class="n">session</span><span class="p">:</span> <span class="n">Session</span>
     <span class="n">session_video_hosted_url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">session_content_hash</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">audio_uri</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">transcript</span><span class="p">:</span> <span class="n">Transcript</span>
     <span class="n">transcript_uri</span><span class="p">:</span> <span class="nb">str</span>
@@ -278,11 +374,9 @@
 
                 <span class="c1"># Check caption uri</span>
                 <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">caption_uri</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">fs</span><span class="p">,</span> <span class="n">caption_path</span> <span class="o">=</span> <span class="n">url_to_fs</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">caption_uri</span><span class="p">)</span>
-
                     <span class="c1"># If the caption doesn&#39;t exist, remove the property</span>
                     <span class="c1"># This will result in Speech-to-Text being used instead</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">fs</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">caption_path</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">resource_exists</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">caption_uri</span><span class="p">):</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                             <span class="sa">f</span><span class="s2">&quot;File not found using provided caption URI: &quot;</span>
                             <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">caption_uri</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
@@ -293,8 +387,8 @@
 
                 <span class="c1"># Generate transcript</span>
                 <span class="n">transcript_uri</span><span class="p">,</span> <span class="n">transcript</span> <span class="o">=</span> <span class="n">generate_transcript</span><span class="p">(</span>
-                    <span class="n">session_content_hash</span><span class="o">=</span><span class="n">session_content_hash</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-                    <span class="n">audio_uri</span><span class="o">=</span><span class="n">audio_uri</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+                    <span class="n">session_content_hash</span><span class="o">=</span><span class="n">session_content_hash</span><span class="p">,</span>
+                    <span class="n">audio_uri</span><span class="o">=</span><span class="n">audio_uri</span><span class="p">,</span>
                     <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span>
                     <span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
                     <span class="n">bucket</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">validated_gcs_bucket_name</span><span class="p">,</span>
@@ -321,9 +415,10 @@
 
                 <span class="c1"># Store all processed and provided data</span>
                 <span class="n">session_processing_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">compile_session_processing_result</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                    <span class="n">compile_session_processing_result</span><span class="p">(</span>
                         <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span>
                         <span class="n">session_video_hosted_url</span><span class="o">=</span><span class="n">session_video_hosted_url</span><span class="p">,</span>
+                        <span class="n">session_content_hash</span><span class="o">=</span><span class="n">session_content_hash</span><span class="p">,</span>
                         <span class="n">audio_uri</span><span class="o">=</span><span class="n">audio_uri</span><span class="p">,</span>
                         <span class="n">transcript</span><span class="o">=</span><span class="n">transcript</span><span class="p">,</span>
                         <span class="n">transcript_uri</span><span class="o">=</span><span class="n">transcript_uri</span><span class="p">,</span>
@@ -454,25 +549,29 @@
         <span class="c1"># Update variable name for easier downstream typing</span>
         <span class="n">video_filepath</span> <span class="o">=</span> <span class="n">mp4_filepath</span>
 
+    <span class="c1"># Check if original session video uri is a m3u8</span>
+    <span class="c1"># We cant follow the normal coonvert video process from above</span>
+    <span class="c1"># because the m3u8 looks to the URI for all the chunks</span>
+    <span class="k">elif</span> <span class="n">session</span><span class="o">.</span><span class="n">video_uri</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.m3u8&quot;</span><span class="p">):</span>
+        <span class="n">cdp_will_host</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="c1"># Store if the original host isn&#39;t https</span>
-    <span class="k">elif</span> <span class="ow">not</span> <span class="n">session</span><span class="o">.</span><span class="n">video_uri</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;https://&quot;</span><span class="p">):</span>
-        <span class="c1"># Attempt to find secure version of resource and simply swap</span>
-        <span class="c1"># otherwise we will have to host</span>
-        <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">video_uri</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;http://&quot;</span><span class="p">):</span>
-            <span class="n">secure_uri</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">video_uri</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;http://&quot;</span><span class="p">,</span> <span class="s2">&quot;https://&quot;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">resource_exists</span><span class="p">(</span><span class="n">secure_uri</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">is_secure_uri</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">video_uri</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resource_uri</span> <span class="o">=</span> <span class="n">try_url</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">video_uri</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">LookupError</span><span class="p">:</span>
+            <span class="c1"># The provided URI could still be like GCS or S3 URI, which</span>
+            <span class="c1"># works for download but not for streaming / hosting</span>
+            <span class="n">cdp_will_host</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_secure_uri</span><span class="p">(</span><span class="n">resource_uri</span><span class="p">):</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Found secure version of </span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">video_uri</span><span class="si">}</span><span class="s2">, &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;updating stored video URI.&quot;</span>
                 <span class="p">)</span>
-                <span class="n">hosted_video_media_url</span> <span class="o">=</span> <span class="n">secure_uri</span>
+                <span class="n">hosted_video_media_url</span> <span class="o">=</span> <span class="n">resource_uri</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">cdp_will_host</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="c1"># The provided URI could still be like GCS or S3 URI, which works for download</span>
-        <span class="c1"># but not for streaming / hosting</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">cdp_will_host</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">hosted_video_media_url</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">video_uri</span>
 
@@ -808,7 +907,7 @@
 
     <span class="c1"># Dump to JSON</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">transcript_save_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">open_resource</span><span class="p">:</span>
-        <span class="n">open_resource</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">transcript</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
+        <span class="n">open_resource</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">transcript</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 
     <span class="c1"># Store to file store</span>
     <span class="n">transcript_file_uri</span> <span class="o">=</span> <span class="n">fs_functions</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span>
@@ -870,7 +969,7 @@
     <span class="k">if</span> <span class="n">transcript_exists</span><span class="p">:</span>
         <span class="n">fs</span> <span class="o">=</span> <span class="n">GCSFileSystem</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">)</span>
         <span class="k">with</span> <span class="n">fs</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">transcript_uri</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">open_resource</span><span class="p">:</span>
-            <span class="n">transcript</span> <span class="o">=</span> <span class="n">Transcript</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">open_resource</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
+            <span class="n">transcript</span> <span class="o">=</span> <span class="n">Transcript</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">open_resource</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">transcript</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -982,7 +1081,7 @@
     <span class="p">)</span>
     <span class="n">result_transcript</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;merge_in_memory_transcript&quot;</span>
 
-    <span class="k">return</span> <span class="p">(</span><span class="n">result_transcript_uri</span><span class="p">,</span> <span class="n">result_transcript</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
+    <span class="k">return</span> <span class="p">(</span><span class="n">result_transcript_uri</span><span class="p">,</span> <span class="n">result_transcript</span><span class="p">)</span></div>
 
 
 <span class="nd">@task</span><span class="p">(</span><span class="n">nout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -1061,6 +1160,7 @@
 <span class="k">def</span> <span class="nf">compile_session_processing_result</span><span class="p">(</span>
     <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span>
     <span class="n">session_video_hosted_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">session_content_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">audio_uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">transcript</span><span class="p">:</span> <span class="n">Transcript</span><span class="p">,</span>
     <span class="n">transcript_uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1070,6 +1170,7 @@
     <span class="k">return</span> <span class="n">SessionProcessingResult</span><span class="p">(</span>
         <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span>
         <span class="n">session_video_hosted_url</span><span class="o">=</span><span class="n">session_video_hosted_url</span><span class="p">,</span>
+        <span class="n">session_content_hash</span><span class="o">=</span><span class="n">session_content_hash</span><span class="p">,</span>
         <span class="n">audio_uri</span><span class="o">=</span><span class="n">audio_uri</span><span class="p">,</span>
         <span class="n">transcript</span><span class="o">=</span><span class="n">transcript</span><span class="p">,</span>
         <span class="n">transcript_uri</span><span class="o">=</span><span class="n">transcript_uri</span><span class="p">,</span>
@@ -1091,7 +1192,7 @@
     <span class="c1"># So, if the same person is referenced multiple times in the ingestion model</span>
     <span class="c1"># but most of those references have the same data and only a few have different data</span>
     <span class="c1"># the produced JSON string will note the differences and run when it needs to.</span>
-    <span class="n">person_cache_key</span> <span class="o">=</span> <span class="n">person</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
+    <span class="n">person_cache_key</span> <span class="o">=</span> <span class="n">person</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">person_cache_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">upload_cache</span><span class="p">:</span>
         <span class="c1"># Store person picture file</span>
@@ -1122,9 +1223,9 @@
                     <span class="n">db_model</span><span class="o">=</span><span class="n">person_picture_db_model</span><span class="p">,</span>
                     <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="n">ClientResponseError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="n">ClientResponseError</span><span class="p">,</span> <span class="ne">ConnectionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">person_picture_db_model</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Person (&#39;</span><span class="si">{</span><span class="n">person</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;), picture URI could not be archived.&quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">person</span><span class="o">.</span><span class="n">picture_uri</span><span class="si">}</span><span class="s2">). Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
@@ -1142,8 +1243,13 @@
                 <span class="n">db_model</span><span class="o">=</span><span class="n">person_db_model</span><span class="p">,</span>
                 <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">except</span> <span class="p">(</span><span class="n">FieldValidationFailed</span><span class="p">,</span> <span class="n">RequiredField</span><span class="p">,</span> <span class="n">InvalidFieldType</span><span class="p">):</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+        <span class="k">except</span> <span class="p">(</span>
+            <span class="n">FieldValidationFailed</span><span class="p">,</span>
+            <span class="n">RequiredField</span><span class="p">,</span>
+            <span class="n">InvalidFieldType</span><span class="p">,</span>
+            <span class="ne">ConnectionError</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Person (</span><span class="si">{</span><span class="n">person_db_model</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span><span class="si">}</span><span class="s2">), &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;was missing required information. Generating minimum person details.&quot;</span>
             <span class="p">)</span>
@@ -1190,9 +1296,9 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">person_seat_image_db_model</span> <span class="o">=</span> <span class="kc">None</span>
 
-            <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="n">ClientResponseError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="n">ClientResponseError</span><span class="p">,</span> <span class="ne">ConnectionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">person_seat_image_db_model</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Person (&#39;</span><span class="si">{</span><span class="n">person</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;), seat image URI could not be archived.&quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">person</span><span class="o">.</span><span class="n">seat</span><span class="o">.</span><span class="n">image_uri</span><span class="si">}</span><span class="s2">). Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
@@ -1361,8 +1467,8 @@
             <span class="n">db_model</span><span class="o">=</span><span class="n">event_db_model</span><span class="p">,</span>
             <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="k">except</span> <span class="n">FieldValidationFailed</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">FieldValidationFailed</span><span class="p">,</span> <span class="ne">ConnectionError</span><span class="p">):</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Agenda and/or minutes docs could not be found. &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;Adding event without agenda and minutes URIs. &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">agenda_uri</span><span class="si">}</span><span class="s2"> AND/OR </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">minutes_uri</span><span class="si">}</span><span class="s2"> do not exist)&quot;</span>
@@ -1407,6 +1513,7 @@
         <span class="n">session_db_model</span> <span class="o">=</span> <span class="n">db_functions</span><span class="o">.</span><span class="n">create_session</span><span class="p">(</span>
             <span class="n">session</span><span class="o">=</span><span class="n">session_result</span><span class="o">.</span><span class="n">session</span><span class="p">,</span>
             <span class="n">session_video_hosted_url</span><span class="o">=</span><span class="n">session_result</span><span class="o">.</span><span class="n">session_video_hosted_url</span><span class="p">,</span>
+            <span class="n">session_content_hash</span><span class="o">=</span><span class="n">session_result</span><span class="o">.</span><span class="n">session_content_hash</span><span class="p">,</span>
             <span class="n">event_ref</span><span class="o">=</span><span class="n">event_db_model</span><span class="p">,</span>
             <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
         <span class="p">)</span>
@@ -1462,7 +1569,7 @@
                         <span class="p">)</span>
 
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">matter_db_model</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+                <span class="n">matter_db_model</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="c1"># Create minutes item</span>
             <span class="n">minutes_item_db_model</span> <span class="o">=</span> <span class="n">db_functions</span><span class="o">.</span><span class="n">create_minutes_item</span><span class="p">(</span>
@@ -1531,7 +1638,7 @@
                             <span class="n">db_model</span><span class="o">=</span><span class="n">matter_status_db_model</span><span class="p">,</span>
                             <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
                         <span class="p">)</span>
-                    <span class="k">except</span> <span class="n">FieldValidationFailed</span><span class="p">:</span>
+                    <span class="k">except</span> <span class="p">(</span><span class="n">FieldValidationFailed</span><span class="p">,</span> <span class="n">RequiredField</span><span class="p">):</span>
                         <span class="n">allowed_matter_decisions</span> <span class="o">=</span> <span class="p">(</span>
                             <span class="n">constants_utils</span><span class="o">.</span><span class="n">get_all_class_attr_values</span><span class="p">(</span>
                                 <span class="n">db_constants</span><span class="o">.</span><span class="n">MatterStatusDecision</span>
@@ -1549,6 +1656,15 @@
             <span class="c1"># Add supporting files for matter and event minutes item</span>
             <span class="k">if</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">supporting_files</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">supporting_file</span> <span class="ow">in</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">supporting_files</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">file_uri</span> <span class="o">=</span> <span class="n">try_url</span><span class="p">(</span><span class="n">supporting_file</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
+                        <span class="n">supporting_file</span><span class="o">.</span><span class="n">uri</span> <span class="o">=</span> <span class="n">file_uri</span>
+                    <span class="k">except</span> <span class="ne">LookupError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;SupportingFile (&#39;</span><span class="si">{</span><span class="n">supporting_file</span><span class="o">.</span><span class="n">uri</span><span class="si">}</span><span class="s2">&#39;) &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;uri does not exist. Skipping. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                        <span class="k">continue</span>
 
                     <span class="c1"># Archive as matter file</span>
                     <span class="k">if</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">matter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1562,10 +1678,13 @@
                                 <span class="n">db_model</span><span class="o">=</span><span class="n">matter_file_db_model</span><span class="p">,</span>
                                 <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
                             <span class="p">)</span>
-                        <span class="k">except</span> <span class="n">FieldValidationFailed</span><span class="p">:</span>
+                        <span class="k">except</span> <span class="p">(</span>
+                            <span class="n">FieldValidationFailed</span><span class="p">,</span>
+                            <span class="ne">ConnectionError</span><span class="p">,</span>
+                        <span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                             <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                                 <span class="sa">f</span><span class="s2">&quot;MatterFile (&#39;</span><span class="si">{</span><span class="n">supporting_file</span><span class="o">.</span><span class="n">uri</span><span class="si">}</span><span class="s2">&#39;) &quot;</span>
-                                <span class="sa">f</span><span class="s2">&quot;could not be archived. Skipping.&quot;</span>
+                                <span class="sa">f</span><span class="s2">&quot;could not be archived. Skipping. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
                             <span class="p">)</span>
 
                     <span class="c1"># Archive as event minutes item file</span>
@@ -1581,10 +1700,10 @@
                             <span class="n">db_model</span><span class="o">=</span><span class="n">event_minutes_item_file_db_model</span><span class="p">,</span>
                             <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
                         <span class="p">)</span>
-                    <span class="k">except</span> <span class="n">FieldValidationFailed</span><span class="p">:</span>
+                    <span class="k">except</span> <span class="p">(</span><span class="n">FieldValidationFailed</span><span class="p">,</span> <span class="ne">ConnectionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                             <span class="sa">f</span><span class="s2">&quot;EventMinutesItemFile (&#39;</span><span class="si">{</span><span class="n">supporting_file</span><span class="o">.</span><span class="n">uri</span><span class="si">}</span><span class="s2">&#39;) &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;could not be archived.&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;could not be archived. Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
                         <span class="p">)</span>
 
             <span class="c1"># Add vote information</span>
@@ -1648,32 +1767,46 @@
                         <span class="sa">f</span><span class="s2">&quot;event minutes item was &#39;None&#39;.&quot;</span>
                     <span class="p">)</span>
 </pre></div>
-
-           </div>
-          </div>
-          <footer>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2020, Jackson Maxfield Brown.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
+        </article>
       </div>
-    </section>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
   </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
-</body>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/scripts/furo.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    </body>
 </html>
