@@ -4,10 +4,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.09.15"/>
-        <title>cdp_backend.pipeline.event_gather_pipeline - cdp-backend 0.1.dev1+gab3a65d documentation</title>
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
+        <title>cdp_backend.pipeline.event_gather_pipeline - cdp-backend 0.1.dev1+gf63a343 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">cdp-backend 0.1.dev1+gab3a65d documentation</div></a>
+      <a href="../../../index.html"><div class="brand">cdp-backend 0.1.dev1+gf63a343 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,10 +146,10 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
   
-  <span class="sidebar-brand-text">cdp-backend 0.1.dev1+gab3a65d documentation</span>
+  <span class="sidebar-brand-text">cdp-backend 0.1.dev1+gf63a343 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -215,15 +215,19 @@
         <article role="main">
           <h1>Source code for cdp_backend.pipeline.event_gather_pipeline</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># -*- coding: utf-8 -*-</span>
 
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">http.client</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">attrgetter</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">NamedTuple</span>
+<span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
+<span class="kn">import</span> <span class="nn">backoff</span>
 <span class="kn">from</span> <span class="nn">aiohttp.client_exceptions</span> <span class="kn">import</span> <span class="n">ClientResponseError</span>
 <span class="kn">from</span> <span class="nn">fireo.fields.errors</span> <span class="kn">import</span> <span class="n">FieldValidationFailed</span><span class="p">,</span> <span class="n">InvalidFieldType</span><span class="p">,</span> <span class="n">RequiredField</span>
 <span class="kn">from</span> <span class="nn">gcsfs</span> <span class="kn">import</span> <span class="n">GCSFileSystem</span>
@@ -237,7 +241,7 @@
 <span class="kn">from</span> <span class="nn">..database</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">db_models</span>
 <span class="kn">from</span> <span class="nn">..database.validators</span> <span class="kn">import</span> <span class="n">is_secure_uri</span><span class="p">,</span> <span class="n">resource_exists</span><span class="p">,</span> <span class="n">try_url</span>
 <span class="kn">from</span> <span class="nn">..file_store</span> <span class="kn">import</span> <span class="n">functions</span> <span class="k">as</span> <span class="n">fs_functions</span>
-<span class="kn">from</span> <span class="nn">..sr_models</span> <span class="kn">import</span> <span class="n">GoogleCloudSRModel</span><span class="p">,</span> <span class="n">WebVTTSRModel</span>
+<span class="kn">from</span> <span class="nn">..sr_models</span> <span class="kn">import</span> <span class="n">WhisperModel</span>
 <span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">constants_utils</span><span class="p">,</span> <span class="n">file_utils</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">ingestion_models</span>
 <span class="kn">from</span> <span class="nn">.ingestion_models</span> <span class="kn">import</span> <span class="n">EventIngestionModel</span><span class="p">,</span> <span class="n">Session</span>
@@ -269,15 +273,27 @@
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">func_name</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="get_events_with_backoff"><a class="viewcode-back" href="../../../cdp_backend.pipeline.html#cdp_backend.pipeline.event_gather_pipeline.get_events_with_backoff">[docs]</a><span class="nd">@backoff</span><span class="o">.</span><span class="n">on_exception</span><span class="p">(</span>
+    <span class="n">backoff</span><span class="o">.</span><span class="n">expo</span><span class="p">,</span>
+    <span class="n">http</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">HTTPException</span><span class="p">,</span>
+    <span class="n">max_tries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_events_with_backoff</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">start_dt</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+    <span class="n">end_dt</span><span class="p">:</span> <span class="n">datetime</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ingestion_models</span><span class="o">.</span><span class="n">EventIngestionModel</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">from_dt</span><span class="o">=</span><span class="n">start_dt</span><span class="p">,</span> <span class="n">to_dt</span><span class="o">=</span><span class="n">end_dt</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="create_event_gather_flow"><a class="viewcode-back" href="../../../cdp_backend.pipeline.html#cdp_backend.pipeline.event_gather_pipeline.create_event_gather_flow">[docs]</a><span class="k">def</span> <span class="nf">create_event_gather_flow</span><span class="p">(</span>
     <span class="n">config</span><span class="p">:</span> <span class="n">EventGatherPipelineConfig</span><span class="p">,</span>
-    <span class="n">from_dt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">to_dt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">datetime</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">prefetched_events</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">EventIngestionModel</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">from_dt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">to_dt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prefetched_events</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">EventIngestionModel</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Flow</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Provided a function to gather new event information, create the Prefect Flow object</span>
-<span class="sd">    to preview, run, or visualize.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create the Prefect Flow object to preview, run, or visualize.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -291,6 +307,9 @@
 <span class="sd">        Optional ISO formatted string or datetime object to pass to the get_events</span>
 <span class="sd">        function to act as the end point for event gathering.</span>
 <span class="sd">        Default: None (now)</span>
+<span class="sd">    prefetched_events: Optional[List[EventIngestionModel]]</span>
+<span class="sd">        A list of events to process instead of running the scraper found in the config.</span>
+<span class="sd">        Default: None (use the scraper from the config)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -330,25 +349,27 @@
             <span class="n">events</span> <span class="o">=</span> <span class="n">prefetched_events</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">events</span> <span class="o">=</span> <span class="n">get_events_func</span><span class="p">(</span>
-                <span class="n">from_dt</span><span class="o">=</span><span class="n">from_datetime</span><span class="p">,</span>
-                <span class="n">to_dt</span><span class="o">=</span><span class="n">to_datetime</span><span class="p">,</span>
+            <span class="c1"># Run the get events</span>
+            <span class="n">events</span> <span class="o">=</span> <span class="n">get_events_with_backoff</span><span class="p">(</span>
+                <span class="n">get_events_func</span><span class="p">,</span>
+                <span class="n">start_dt</span><span class="o">=</span><span class="n">from_datetime</span><span class="p">,</span>
+                <span class="n">end_dt</span><span class="o">=</span><span class="n">to_datetime</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="c1"># Safety measure catch</span>
         <span class="k">if</span> <span class="n">events</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">events</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2"> events.&quot;</span><span class="p">)</span>
-
         <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
-            <span class="n">session_processing_results</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SessionProcessingResult</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">session_processing_results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SessionProcessingResult</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
-                <span class="c1"># Download video to local copy</span>
-                <span class="n">resource_copy_filepath</span> <span class="o">=</span> <span class="n">resource_copy_task</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">video_uri</span><span class="p">)</span>
-
-                <span class="c1"># Get unique session identifier</span>
-                <span class="n">session_content_hash</span> <span class="o">=</span> <span class="n">get_session_content_hash</span><span class="p">(</span>
-                    <span class="n">tmp_video_filepath</span><span class="o">=</span><span class="n">resource_copy_filepath</span><span class="p">,</span>
+                <span class="c1"># Download video to local copy making</span>
+                <span class="c1"># copy unique in case of shared session video</span>
+                <span class="n">resource_copy_filepath</span> <span class="o">=</span> <span class="n">resource_copy_task</span><span class="p">(</span>
+                    <span class="n">uri</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">video_uri</span><span class="p">,</span>
+                    <span class="n">dst</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid4</span><span class="p">())</span><span class="si">}</span><span class="s2">_temp&quot;</span><span class="p">,</span>
+                    <span class="n">copy_suffix</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
 
                 <span class="c1"># Handle video conversion or non-secure resource</span>
@@ -356,8 +377,8 @@
                 <span class="p">(</span>
                     <span class="n">tmp_video_filepath</span><span class="p">,</span>
                     <span class="n">session_video_hosted_url</span><span class="p">,</span>
+                    <span class="n">session_content_hash</span><span class="p">,</span>
                 <span class="p">)</span> <span class="o">=</span> <span class="n">convert_video_and_handle_host</span><span class="p">(</span>
-                    <span class="n">session_content_hash</span><span class="o">=</span><span class="n">session_content_hash</span><span class="p">,</span>
                     <span class="n">video_filepath</span><span class="o">=</span><span class="n">resource_copy_filepath</span><span class="p">,</span>
                     <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span>
                     <span class="n">credentials_file</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">google_credentials_file</span><span class="p">,</span>
@@ -365,7 +386,7 @@
                 <span class="p">)</span>
 
                 <span class="c1"># Split audio and store</span>
-                <span class="n">audio_uri</span> <span class="o">=</span> <span class="n">split_audio</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">audio_uri</span><span class="p">,</span> <span class="n">local_audio_path</span><span class="p">,)</span> <span class="o">=</span> <span class="n">split_audio</span><span class="p">(</span>
                     <span class="n">session_content_hash</span><span class="o">=</span><span class="n">session_content_hash</span><span class="p">,</span>
                     <span class="n">tmp_video_filepath</span><span class="o">=</span><span class="n">tmp_video_filepath</span><span class="p">,</span>
                     <span class="n">bucket</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">validated_gcs_bucket_name</span><span class="p">,</span>
@@ -374,29 +395,24 @@
 
                 <span class="c1"># Check caption uri</span>
                 <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">caption_uri</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="c1"># If the caption doesn&#39;t exist, remove the property</span>
-                    <span class="c1"># This will result in Speech-to-Text being used instead</span>
+                    <span class="c1"># If the caption doesn&#39;t exist, remove the value</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">resource_exists</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">caption_uri</span><span class="p">):</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                             <span class="sa">f</span><span class="s2">&quot;File not found using provided caption URI: &quot;</span>
                             <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">session</span><span class="o">.</span><span class="n">caption_uri</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;Removing the referenced caption URI and will process &quot;</span>
-                            <span class="sa">f</span><span class="s2">&quot;the session using Speech-to-Text.&quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;Removing the referenced caption URI.&quot;</span>
                         <span class="p">)</span>
                         <span class="n">session</span><span class="o">.</span><span class="n">caption_uri</span> <span class="o">=</span> <span class="kc">None</span>
 
                 <span class="c1"># Generate transcript</span>
                 <span class="n">transcript_uri</span><span class="p">,</span> <span class="n">transcript</span> <span class="o">=</span> <span class="n">generate_transcript</span><span class="p">(</span>
                     <span class="n">session_content_hash</span><span class="o">=</span><span class="n">session_content_hash</span><span class="p">,</span>
-                    <span class="n">audio_uri</span><span class="o">=</span><span class="n">audio_uri</span><span class="p">,</span>
+                    <span class="n">audio_path</span><span class="o">=</span><span class="n">local_audio_path</span><span class="p">,</span>
                     <span class="n">session</span><span class="o">=</span><span class="n">session</span><span class="p">,</span>
-                    <span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
                     <span class="n">bucket</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">validated_gcs_bucket_name</span><span class="p">,</span>
                     <span class="n">credentials_file</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">google_credentials_file</span><span class="p">,</span>
-                    <span class="n">caption_new_speaker_turn_pattern</span><span class="o">=</span><span class="p">(</span>
-                        <span class="n">config</span><span class="o">.</span><span class="n">caption_new_speaker_turn_pattern</span>
-                    <span class="p">),</span>
-                    <span class="n">caption_confidence</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">caption_confidence</span><span class="p">,</span>
+                    <span class="n">whisper_model_name</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">whisper_model_name</span><span class="p">,</span>
+                    <span class="n">whisper_model_confidence</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">whisper_model_confidence</span><span class="p">,</span>
                 <span class="p">)</span>
 
                 <span class="c1"># Generate thumbnails</span>
@@ -411,6 +427,10 @@
                 <span class="c1"># Add audio uri and static thumbnail uri</span>
                 <span class="n">resource_delete_task</span><span class="p">(</span>
                     <span class="n">tmp_video_filepath</span><span class="p">,</span> <span class="n">upstream_tasks</span><span class="o">=</span><span class="p">[</span><span class="n">audio_uri</span><span class="p">,</span> <span class="n">static_thumbnail_uri</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">resource_delete_task</span><span class="p">(</span>
+                    <span class="n">local_audio_path</span><span class="p">,</span>
+                    <span class="n">upstream_tasks</span><span class="o">=</span><span class="p">[</span><span class="n">transcript</span><span class="p">],</span>
                 <span class="p">)</span>
 
                 <span class="c1"># Store all processed and provided data</span>
@@ -439,14 +459,20 @@
 
 
 <span class="nd">@task</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">retry_delay</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">120</span><span class="p">))</span>
-<span class="k">def</span> <span class="nf">resource_copy_task</span><span class="p">(</span><span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">resource_copy_task</span><span class="p">(</span><span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">copy_suffix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Copy a file to a temporary location for processing.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    uri: str</span>
 <span class="sd">        The URI to the file to copy.</span>
+<span class="sd">    dst: Optional[str]</span>
+<span class="sd">        An optional destination path for the file.</span>
+<span class="sd">        Default: None (place the file in the current directory with the same file name)</span>
+<span class="sd">    copy_suffix: bool</span>
+<span class="sd">        A bool for if the file suffix should be copied.</span>
+<span class="sd">        Default: False</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -460,14 +486,16 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">file_utils</span><span class="o">.</span><span class="n">resource_copy</span><span class="p">(</span>
         <span class="n">uri</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span>
+        <span class="n">dst</span><span class="o">=</span><span class="n">dst</span><span class="p">,</span>
+        <span class="n">copy_suffix</span><span class="o">=</span><span class="n">copy_suffix</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="nd">@task</span>
 <span class="k">def</span> <span class="nf">resource_delete_task</span><span class="p">(</span><span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove local file</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove local file.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -481,7 +509,7 @@
 <span class="k">def</span> <span class="nf">get_session_content_hash</span><span class="p">(</span>
     <span class="n">tmp_video_filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hash the video file content to get a unique identifier for the session.</span>
 
 <span class="sd">    Parameters</span>
@@ -498,15 +526,14 @@
     <span class="k">return</span> <span class="n">file_utils</span><span class="o">.</span><span class="n">hash_file_contents</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">tmp_video_filepath</span><span class="p">)</span>
 
 
-<span class="nd">@task</span><span class="p">(</span><span class="n">nout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="nd">@task</span><span class="p">(</span><span class="n">nout</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">convert_video_and_handle_host</span><span class="p">(</span>
-    <span class="n">session_content_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">video_filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span>
     <span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a video to MP4 (if necessary), upload it to the file store, and remove</span>
 <span class="sd">    the original non-MP4 file that was resource copied.</span>
 
@@ -535,19 +562,41 @@
     <span class="c1"># Get file extension</span>
     <span class="n">ext</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">video_filepath</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
+    <span class="n">trim_video</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">video_start_time</span> <span class="ow">or</span> <span class="n">session</span><span class="o">.</span><span class="n">video_end_time</span><span class="p">)</span>
+
     <span class="c1"># Convert to mp4 if file isn&#39;t of approved web format</span>
     <span class="n">cdp_will_host</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">ext</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.mp4&quot;</span><span class="p">,</span> <span class="s2">&quot;.webm&quot;</span><span class="p">]:</span>
         <span class="n">cdp_will_host</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># Convert video to mp4</span>
-        <span class="n">mp4_filepath</span> <span class="o">=</span> <span class="n">file_utils</span><span class="o">.</span><span class="n">convert_video_to_mp4</span><span class="p">(</span><span class="n">video_filepath</span><span class="p">)</span>
+        <span class="n">mp4_filepath</span> <span class="o">=</span> <span class="n">file_utils</span><span class="o">.</span><span class="n">convert_video_to_mp4</span><span class="p">(</span>
+            <span class="n">video_filepath</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">video_filepath</span><span class="p">),</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">video_start_time</span><span class="p">,</span>
+            <span class="n">end_time</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">video_end_time</span><span class="p">,</span>
+        <span class="p">)</span>
 
-        <span class="c1"># Remove old mkv file</span>
         <span class="n">fs_functions</span><span class="o">.</span><span class="n">remove_local_file</span><span class="p">(</span><span class="n">video_filepath</span><span class="p">)</span>
 
         <span class="c1"># Update variable name for easier downstream typing</span>
-        <span class="n">video_filepath</span> <span class="o">=</span> <span class="n">mp4_filepath</span>
+        <span class="n">video_filepath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mp4_filepath</span><span class="p">)</span>
+
+    <span class="c1"># host trimmed videos because it&#39;s simpler than setting</span>
+    <span class="c1"># up transcription and playback ranges</span>
+    <span class="k">elif</span> <span class="n">trim_video</span><span class="p">:</span>
+        <span class="n">cdp_will_host</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Trim video</span>
+        <span class="n">trimmed_filepath</span> <span class="o">=</span> <span class="n">file_utils</span><span class="o">.</span><span class="n">clip_and_reformat_video</span><span class="p">(</span>
+            <span class="n">video_filepath</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">video_filepath</span><span class="p">),</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">video_start_time</span><span class="p">,</span>
+            <span class="n">end_time</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">video_end_time</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">fs_functions</span><span class="o">.</span><span class="n">remove_local_file</span><span class="p">(</span><span class="n">video_filepath</span><span class="p">)</span>
+
+        <span class="c1"># Update variable name for easier downstream typing</span>
+        <span class="n">video_filepath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">trimmed_filepath</span><span class="p">)</span>
 
     <span class="c1"># Check if original session video uri is a m3u8</span>
     <span class="c1"># We cant follow the normal coonvert video process from above</span>
@@ -575,6 +624,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">hosted_video_media_url</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">video_uri</span>
 
+    <span class="c1"># Get unique session identifier</span>
+    <span class="n">session_content_hash</span> <span class="o">=</span> <span class="n">file_utils</span><span class="o">.</span><span class="n">hash_file_contents</span><span class="p">(</span><span class="n">uri</span><span class="o">=</span><span class="n">video_filepath</span><span class="p">)</span>
+
     <span class="c1"># Upload and swap if cdp is hosting</span>
     <span class="k">if</span> <span class="n">cdp_will_host</span><span class="p">:</span>
         <span class="c1"># Upload to gcsfs</span>
@@ -592,17 +644,17 @@
             <span class="n">uri</span><span class="o">=</span><span class="n">hosted_video_uri</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">video_filepath</span><span class="p">,</span> <span class="n">hosted_video_media_url</span>
+    <span class="k">return</span> <span class="n">video_filepath</span><span class="p">,</span> <span class="n">hosted_video_media_url</span><span class="p">,</span> <span class="n">session_content_hash</span>
 
 
-<span class="nd">@task</span>
+<span class="nd">@task</span><span class="p">(</span><span class="n">nout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">split_audio</span><span class="p">(</span>
     <span class="n">session_content_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">tmp_video_filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Split the audio from a local video file.</span>
 
 <span class="sd">    Parameters</span>
@@ -620,12 +672,14 @@
 <span class="sd">    -------</span>
 <span class="sd">    audio_uri: str</span>
 <span class="sd">        The URI to the uploaded audio file.</span>
+<span class="sd">    audio_local_path: str</span>
+<span class="sd">        The local path for the split audio.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Check for existing audio</span>
-    <span class="n">tmp_audio_filepath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_content_hash</span><span class="si">}</span><span class="s2">-audio.wav&quot;</span>
+    <span class="n">local_audio_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_content_hash</span><span class="si">}</span><span class="s2">-audio.wav&quot;</span>
     <span class="n">audio_uri</span> <span class="o">=</span> <span class="n">fs_functions</span><span class="o">.</span><span class="n">get_file_uri</span><span class="p">(</span>
         <span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span>
-        <span class="n">filename</span><span class="o">=</span><span class="n">tmp_audio_filepath</span><span class="p">,</span>
+        <span class="n">filename</span><span class="o">=</span><span class="n">local_audio_path</span><span class="p">,</span>
         <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -633,12 +687,12 @@
     <span class="k">if</span> <span class="n">audio_uri</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Split and store the audio in temporary file prior to upload</span>
         <span class="p">(</span>
-            <span class="n">tmp_audio_filepath</span><span class="p">,</span>
+            <span class="n">local_audio_path</span><span class="p">,</span>
             <span class="n">tmp_audio_log_out_filepath</span><span class="p">,</span>
             <span class="n">tmp_audio_log_err_filepath</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">=</span> <span class="n">file_utils</span><span class="o">.</span><span class="n">split_audio</span><span class="p">(</span>
             <span class="n">video_read_path</span><span class="o">=</span><span class="n">tmp_video_filepath</span><span class="p">,</span>
-            <span class="n">audio_save_path</span><span class="o">=</span><span class="n">tmp_audio_filepath</span><span class="p">,</span>
+            <span class="n">audio_save_path</span><span class="o">=</span><span class="n">local_audio_path</span><span class="p">,</span>
             <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -646,8 +700,7 @@
         <span class="n">audio_uri</span> <span class="o">=</span> <span class="n">fs_functions</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span>
             <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
             <span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span>
-            <span class="n">filepath</span><span class="o">=</span><span class="n">tmp_audio_filepath</span><span class="p">,</span>
-            <span class="n">remove_local</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">filepath</span><span class="o">=</span><span class="n">local_audio_path</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">fs_functions</span><span class="o">.</span><span class="n">upload_file</span><span class="p">(</span>
             <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
@@ -661,213 +714,49 @@
             <span class="n">filepath</span><span class="o">=</span><span class="n">tmp_audio_log_err_filepath</span><span class="p">,</span>
             <span class="n">remove_local</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">audio_uri</span>
-
-
-<span class="nd">@task</span>
-<span class="k">def</span> <span class="nf">construct_speech_to_text_phrases_context</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">EventIngestionModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Construct a list of phrases to use for Google Speech-to-Text speech adaption.</span>
-
-<span class="sd">    See: https://cloud.google.com/speech-to-text/docs/speech-adaptation</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    event: EventIngestionModel</span>
-<span class="sd">        The event details to pull context from.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    phrases: List[str]</span>
-<span class="sd">        Compiled list of strings to act as target weights for the model.</span>
-
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    Phrases are added in order of importance until GCP phrase limits are met.</span>
-<span class="sd">    The order of importance is defined as:</span>
-<span class="sd">    1. body name</span>
-<span class="sd">    2. event minutes item names</span>
-<span class="sd">    3. councilmember names</span>
-<span class="sd">    4. matter titles</span>
-<span class="sd">    5. councilmember role titles</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Note: Google Speech-to-Text allows max 500 phrases</span>
-    <span class="n">phrases</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-
-    <span class="n">PHRASE_LIMIT</span> <span class="o">=</span> <span class="mi">500</span>
-    <span class="n">CUM_CHAR_LIMIT</span> <span class="o">=</span> <span class="mi">9900</span>
-
-    <span class="c1"># In line def for get character count</span>
-    <span class="c1"># Google Speech-to-Text allows cumulative max 9900 characters</span>
-    <span class="k">def</span> <span class="nf">_get_total_char_count</span><span class="p">(</span><span class="n">phrases</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="n">chars</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">phrase</span> <span class="ow">in</span> <span class="n">phrases</span><span class="p">:</span>
-            <span class="n">chars</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">phrase</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">chars</span>
-
-    <span class="k">def</span> <span class="nf">_get_if_added_sum</span><span class="p">(</span><span class="n">phrases</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">next_addition</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="n">current_len</span> <span class="o">=</span> <span class="n">_get_total_char_count</span><span class="p">(</span><span class="n">phrases</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">current_len</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">next_addition</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_within_limit</span><span class="p">(</span><span class="n">phrases</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="n">_get_total_char_count</span><span class="p">(</span><span class="n">phrases</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">CUM_CHAR_LIMIT</span>
-            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">phrases</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">PHRASE_LIMIT</span>
+    <span class="c1"># Download to ensure we have it for later</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">local_audio_path</span> <span class="o">=</span> <span class="n">fs_functions</span><span class="o">.</span><span class="n">download_file</span><span class="p">(</span>
+            <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
+            <span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span>
+            <span class="n">remote_filepath</span><span class="o">=</span><span class="n">local_audio_path</span><span class="p">,</span>
+            <span class="n">save_path</span><span class="o">=</span><span class="n">local_audio_path</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="c1"># Get body name</span>
-    <span class="k">if</span> <span class="n">_within_limit</span><span class="p">(</span><span class="n">phrases</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">_get_if_added_sum</span><span class="p">(</span><span class="n">phrases</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">CUM_CHAR_LIMIT</span><span class="p">:</span>
-            <span class="n">phrases</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-
-    <span class="c1"># Extras from event minutes items</span>
-    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">event_minutes_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Get minutes item name</span>
-        <span class="k">for</span> <span class="n">event_minutes_item</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">event_minutes_items</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">_within_limit</span><span class="p">(</span><span class="n">phrases</span><span class="p">):</span>
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">_get_if_added_sum</span><span class="p">(</span><span class="n">phrases</span><span class="p">,</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">minutes_item</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                    <span class="o">&lt;</span> <span class="n">CUM_CHAR_LIMIT</span>
-                <span class="p">):</span>
-                    <span class="n">phrases</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">event_minutes_item</span><span class="o">.</span><span class="n">minutes_item</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-
-        <span class="c1"># Get councilmember names from sponsors and votes</span>
-        <span class="k">for</span> <span class="n">event_minutes_item</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">event_minutes_items</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">matter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">matter</span><span class="o">.</span><span class="n">sponsors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">sponsor</span> <span class="ow">in</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">matter</span><span class="o">.</span><span class="n">sponsors</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">_within_limit</span><span class="p">(</span><span class="n">phrases</span><span class="p">):</span>
-                            <span class="k">if</span> <span class="p">(</span>
-                                <span class="n">_get_if_added_sum</span><span class="p">(</span><span class="n">phrases</span><span class="p">,</span> <span class="n">sponsor</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                                <span class="o">&lt;</span> <span class="n">CUM_CHAR_LIMIT</span>
-                            <span class="p">):</span>
-                                <span class="n">phrases</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sponsor</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">votes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">vote</span> <span class="ow">in</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">votes</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">_within_limit</span><span class="p">(</span><span class="n">phrases</span><span class="p">):</span>
-                        <span class="k">if</span> <span class="p">(</span>
-                            <span class="n">_get_if_added_sum</span><span class="p">(</span><span class="n">phrases</span><span class="p">,</span> <span class="n">vote</span><span class="o">.</span><span class="n">person</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                            <span class="o">&lt;</span> <span class="n">CUM_CHAR_LIMIT</span>
-                        <span class="p">):</span>
-                            <span class="n">phrases</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vote</span><span class="o">.</span><span class="n">person</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-
-        <span class="c1"># Get matter titles</span>
-        <span class="k">for</span> <span class="n">event_minutes_item</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">event_minutes_items</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">matter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">_within_limit</span><span class="p">(</span><span class="n">phrases</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">_get_if_added_sum</span><span class="p">(</span><span class="n">phrases</span><span class="p">,</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">matter</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-                        <span class="o">&lt;</span> <span class="n">CUM_CHAR_LIMIT</span>
-                    <span class="p">):</span>
-                        <span class="n">phrases</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">event_minutes_item</span><span class="o">.</span><span class="n">matter</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-
-        <span class="c1"># Get councilmember role titles from sponsors and votes</span>
-        <span class="k">for</span> <span class="n">event_minutes_item</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">event_minutes_items</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">matter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">matter</span><span class="o">.</span><span class="n">sponsors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">sponsor</span> <span class="ow">in</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">matter</span><span class="o">.</span><span class="n">sponsors</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">sponsor</span><span class="o">.</span><span class="n">seat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">sponsor</span><span class="o">.</span><span class="n">seat</span><span class="o">.</span><span class="n">roles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                                <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">sponsor</span><span class="o">.</span><span class="n">seat</span><span class="o">.</span><span class="n">roles</span><span class="p">:</span>
-                                    <span class="k">if</span> <span class="p">(</span>
-                                        <span class="n">_get_if_added_sum</span><span class="p">(</span><span class="n">phrases</span><span class="p">,</span> <span class="n">role</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-                                        <span class="o">&lt;</span> <span class="n">CUM_CHAR_LIMIT</span>
-                                    <span class="p">):</span>
-                                        <span class="n">phrases</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">role</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">votes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">vote</span> <span class="ow">in</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">votes</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">vote</span><span class="o">.</span><span class="n">person</span><span class="o">.</span><span class="n">seat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">vote</span><span class="o">.</span><span class="n">person</span><span class="o">.</span><span class="n">seat</span><span class="o">.</span><span class="n">roles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">vote</span><span class="o">.</span><span class="n">person</span><span class="o">.</span><span class="n">seat</span><span class="o">.</span><span class="n">roles</span><span class="p">:</span>
-                                <span class="k">if</span> <span class="n">_within_limit</span><span class="p">(</span><span class="n">phrases</span><span class="p">):</span>
-                                    <span class="k">if</span> <span class="p">(</span>
-                                        <span class="n">_get_if_added_sum</span><span class="p">(</span><span class="n">phrases</span><span class="p">,</span> <span class="n">role</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-                                        <span class="o">&lt;</span> <span class="n">CUM_CHAR_LIMIT</span>
-                                    <span class="p">):</span>
-                                        <span class="n">phrases</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">role</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">phrases</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">audio_uri</span><span class="p">,</span> <span class="n">local_audio_path</span>
 
 
-<span class="nd">@task</span>
+<span class="nd">@task</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">retry_delay</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
 <span class="k">def</span> <span class="nf">use_speech_to_text_and_generate_transcript</span><span class="p">(</span>
-    <span class="n">audio_uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">phrases</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">audio_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;medium&quot;</span><span class="p">,</span>
+    <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Transcript</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Pass the audio URI through to Google Speech-to-Text.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pass the audio path to the speech recognition model.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    audio_uri: str</span>
-<span class="sd">        The URI to the audio path. The audio must already be stored in a GCS bucket.</span>
-<span class="sd">    credentials_file: str</span>
-<span class="sd">        Path to Google Service Account Credentials JSON file.</span>
-<span class="sd">    phrases: Optional[List[str]]</span>
-<span class="sd">        A list of strings to feed as targets to the model.</span>
+<span class="sd">    audio_path: str</span>
+<span class="sd">        The URI to the audio path. The audio must be on the local machine.</span>
+<span class="sd">    model_name: str</span>
+<span class="sd">        The whisper model to use for transcription.</span>
+<span class="sd">    confidence: Optional[float]</span>
+<span class="sd">        The confidence to set the produce transcript to.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    transcript: Transcript</span>
 <span class="sd">        The generated Transcript object.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    See the sr_models.whisper.WhisperModel code for more details about</span>
+<span class="sd">    pass through params.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Init model</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">GoogleCloudSRModel</span><span class="p">(</span><span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">transcribe</span><span class="p">(</span><span class="n">file_uri</span><span class="o">=</span><span class="n">audio_uri</span><span class="p">,</span> <span class="n">phrases</span><span class="o">=</span><span class="n">phrases</span><span class="p">)</span>
-
-
-<span class="nd">@task</span>
-<span class="k">def</span> <span class="nf">get_captions_and_generate_transcript</span><span class="p">(</span>
-    <span class="n">caption_uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">new_turn_pattern</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">confidence</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Transcript</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Download (or copy) a WebVTT closed caption file and convert to CDP Transcript model.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    caption_uri: str</span>
-<span class="sd">        The URI to the caption file to transform into the transcript.</span>
-<span class="sd">    new_turn_pattern: Optional[str]</span>
-<span class="sd">        New speaker turn pattern to pass through to the WebVTT transformer.</span>
-<span class="sd">    confidence: Optional[float]</span>
-<span class="sd">        Confidence to provide to the produced transcript.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    transcript: Transcript</span>
-<span class="sd">        The produced transcript.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># If value provided, passthrough, otherwise ignore</span>
-    <span class="n">model_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">new_turn_pattern</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">model_kwargs</span><span class="p">[</span><span class="s2">&quot;new_turn_pattern&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_turn_pattern</span>
-    <span class="k">if</span> <span class="n">confidence</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">model_kwargs</span><span class="p">[</span><span class="s2">&quot;confidence&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">confidence</span>
-
-    <span class="c1"># Init model</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">WebVTTSRModel</span><span class="p">(</span><span class="o">**</span><span class="n">model_kwargs</span><span class="p">)</span>
-
-    <span class="c1"># Download or copy resource to local</span>
-    <span class="n">caption_filename</span> <span class="o">=</span> <span class="n">caption_uri</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">local_captions</span> <span class="o">=</span> <span class="n">file_utils</span><span class="o">.</span><span class="n">resource_copy</span><span class="p">(</span>
-        <span class="n">uri</span><span class="o">=</span><span class="n">caption_uri</span><span class="p">,</span>
-        <span class="n">dst</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;caption-transcribing-</span><span class="si">{</span><span class="n">caption_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="c1"># Transcribe</span>
-    <span class="n">transcript</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">transcribe</span><span class="p">(</span><span class="n">file_uri</span><span class="o">=</span><span class="n">local_captions</span><span class="p">)</span>
-
-    <span class="c1"># Remove temp file</span>
-    <span class="n">fs_functions</span><span class="o">.</span><span class="n">remove_local_file</span><span class="p">(</span><span class="n">local_captions</span><span class="p">)</span>
-
-    <span class="c1"># Return generated transcript</span>
-    <span class="k">return</span> <span class="n">transcript</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">WhisperModel</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">transcribe</span><span class="p">(</span><span class="n">file_uri</span><span class="o">=</span><span class="n">audio_path</span><span class="p">)</span>
 
 
 <span class="nd">@task</span><span class="p">(</span><span class="n">nout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -877,10 +766,9 @@
     <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Transcript</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Finalizes metadata for a Transcript object, stores the transcript as JSON to object</span>
-<span class="sd">    storage and finally adds transcript and file objects to database.</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Transcript</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finalize and store the transcript to GCP.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -925,8 +813,8 @@
     <span class="n">session_content_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Transcript</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Transcript</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check and load any existing transcript object.</span>
 
 <span class="sd">    Parameters</span>
@@ -953,7 +841,7 @@
     <span class="c1"># Combine to transcript filename</span>
     <span class="n">tmp_transcript_filepath</span> <span class="o">=</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">session_content_hash</span><span class="si">}</span><span class="s2">-&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;cdp_</span><span class="si">{</span><span class="n">__version__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">-&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;cdp_</span><span class="si">{</span><span class="n">__version__</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">-&quot;</span>
         <span class="sa">f</span><span class="s2">&quot;transcript.json&quot;</span>
     <span class="p">)</span>
 
@@ -978,40 +866,33 @@
 
 <div class="viewcode-block" id="generate_transcript"><a class="viewcode-back" href="../../../cdp_backend.pipeline.html#cdp_backend.pipeline.event_gather_pipeline.generate_transcript">[docs]</a><span class="k">def</span> <span class="nf">generate_transcript</span><span class="p">(</span>
     <span class="n">session_content_hash</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">audio_uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">audio_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span>
-    <span class="n">event</span><span class="p">:</span> <span class="n">EventIngestionModel</span><span class="p">,</span>
     <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">caption_new_speaker_turn_pattern</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">caption_confidence</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Transcript</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="n">whisper_model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;medium&quot;</span><span class="p">,</span>
+    <span class="n">whisper_model_confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Transcript</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Route transcript generation to the correct processing.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    session_content_hash: str</span>
 <span class="sd">        The unique key (SHA256 hash of video content) for this session processing.</span>
-<span class="sd">    audio_uri: str</span>
-<span class="sd">        The URI to the audio file to generate a transcript from.</span>
+<span class="sd">    audio_path: str</span>
+<span class="sd">        The path to the audio file to generate a transcript from.</span>
 <span class="sd">    session: Session</span>
 <span class="sd">        The specific session details to be used in final transcript upload and</span>
 <span class="sd">        archival.</span>
-<span class="sd">        Additionally, if a closed caption URI is available on the session object,</span>
-<span class="sd">        the transcript produced from this function will have been created using WebVTT</span>
-<span class="sd">        caption transform rather than Google Speech-to-Text.</span>
-<span class="sd">    event: EventIngestionModel</span>
-<span class="sd">        The parent event of the session. If no captions are available,</span>
-<span class="sd">        speech context phrases will be pulled from the whole event details.</span>
 <span class="sd">    bucket: str</span>
 <span class="sd">        The name of the GCS bucket to upload the produced audio to.</span>
 <span class="sd">    credentials_file: str</span>
-<span class="sd">        Path to Google Service Account Credentials JSON file.</span>
-<span class="sd">    caption_new_speaker_turn_pattern: Optional[str]</span>
-<span class="sd">        Passthrough to sr_models.webvtt_sr_model.WebVTTSRModel.</span>
-<span class="sd">    caption_confidence: Optional[float]</span>
-<span class="sd">        Passthrough to sr_models.webvtt_sr_model.WebVTTSRModel.</span>
+<span class="sd">        Path to the GCS JSON credentials file.</span>
+<span class="sd">    whisper_model_name: str</span>
+<span class="sd">        The whisper model to use for transcription.</span>
+<span class="sd">    whisper_model_confidence: Optional[float]</span>
+<span class="sd">        The confidence to set the produce transcript to.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1034,22 +915,11 @@
 
     <span class="c1"># If no pre-existing transcript with the same parameters, generate</span>
     <span class="k">with</span> <span class="n">case</span><span class="p">(</span><span class="n">transcript_exists</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="c1"># If no captions, generate transcript with Google Speech-to-Text</span>
-        <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">caption_uri</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">phrases</span> <span class="o">=</span> <span class="n">construct_speech_to_text_phrases_context</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">)</span>
-            <span class="n">generated_transcript</span> <span class="o">=</span> <span class="n">use_speech_to_text_and_generate_transcript</span><span class="p">(</span>
-                <span class="n">audio_uri</span><span class="o">=</span><span class="n">audio_uri</span><span class="p">,</span>
-                <span class="n">credentials_file</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">,</span>
-                <span class="n">phrases</span><span class="o">=</span><span class="n">phrases</span><span class="p">,</span>
-            <span class="p">)</span>
-
-        <span class="c1"># Process captions</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">generated_transcript</span> <span class="o">=</span> <span class="n">get_captions_and_generate_transcript</span><span class="p">(</span>
-                <span class="n">caption_uri</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">caption_uri</span><span class="p">,</span>
-                <span class="n">new_turn_pattern</span><span class="o">=</span><span class="n">caption_new_speaker_turn_pattern</span><span class="p">,</span>
-                <span class="n">confidence</span><span class="o">=</span><span class="n">caption_confidence</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="n">generated_transcript</span> <span class="o">=</span> <span class="n">use_speech_to_text_and_generate_transcript</span><span class="p">(</span>
+            <span class="n">audio_path</span><span class="o">=</span><span class="n">audio_path</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="o">=</span><span class="n">whisper_model_name</span><span class="p">,</span>
+            <span class="n">confidence</span><span class="o">=</span><span class="n">whisper_model_confidence</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># Add extra metadata and upload</span>
         <span class="p">(</span>
@@ -1091,9 +961,9 @@
     <span class="n">event</span><span class="p">:</span> <span class="n">EventIngestionModel</span><span class="p">,</span>
     <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates static and hover thumbnails.</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create static and hover thumbnails.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1102,8 +972,7 @@
 <span class="sd">    tmp_video_path: str</span>
 <span class="sd">        The URI to the video file to generate thumbnails from.</span>
 <span class="sd">    event: EventIngestionModel</span>
-<span class="sd">        The parent event of the session. If no captions are available,</span>
-<span class="sd">        speech context phrases will be pulled from the whole event details.</span>
+<span class="sd">        The parent event of the session.</span>
 <span class="sd">    bucket: str</span>
 <span class="sd">        The name of the GCS bucket to upload the produced audio to.</span>
 <span class="sd">    credentials_file: str</span>
@@ -1179,12 +1048,12 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_process_person_ingestion</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">_process_person_ingestion</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
     <span class="n">person</span><span class="p">:</span> <span class="n">ingestion_models</span><span class="o">.</span><span class="n">Person</span><span class="p">,</span>
     <span class="n">default_session</span><span class="p">:</span> <span class="n">Session</span><span class="p">,</span>
     <span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">upload_cache</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">db_models</span><span class="o">.</span><span class="n">Person</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+    <span class="n">upload_cache</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">db_models</span><span class="o">.</span><span class="n">Person</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">db_models</span><span class="o">.</span><span class="n">Person</span><span class="p">:</span>
     <span class="c1"># The JSON string of the whole person tree turns out to be a great cache key because</span>
     <span class="c1"># 1. we can hash strings (which means we can shove them into a dictionary)</span>
@@ -1192,11 +1061,16 @@
     <span class="c1"># So, if the same person is referenced multiple times in the ingestion model</span>
     <span class="c1"># but most of those references have the same data and only a few have different data</span>
     <span class="c1"># the produced JSON string will note the differences and run when it needs to.</span>
+
+    <span class="c1"># Create upload cache</span>
+    <span class="k">if</span> <span class="n">upload_cache</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">upload_cache</span> <span class="o">=</span> <span class="p">{}</span>
+
     <span class="n">person_cache_key</span> <span class="o">=</span> <span class="n">person</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">person_cache_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">upload_cache</span><span class="p">:</span>
         <span class="c1"># Store person picture file</span>
-        <span class="n">person_picture_db_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">File</span><span class="p">]</span>
+        <span class="n">person_picture_db_model</span><span class="p">:</span> <span class="n">db_models</span><span class="o">.</span><span class="n">File</span> <span class="o">|</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">person</span><span class="o">.</span><span class="n">picture_uri</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">tmp_person_picture_path</span> <span class="o">=</span> <span class="n">file_utils</span><span class="o">.</span><span class="n">resource_copy</span><span class="p">(</span>
@@ -1267,7 +1141,7 @@
         <span class="c1"># Create seat</span>
         <span class="k">if</span> <span class="n">person</span><span class="o">.</span><span class="n">seat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Store seat picture file</span>
-            <span class="n">person_seat_image_db_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">File</span><span class="p">]</span>
+            <span class="n">person_seat_image_db_model</span><span class="p">:</span> <span class="n">db_models</span><span class="o">.</span><span class="n">File</span> <span class="o">|</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">person</span><span class="o">.</span><span class="n">seat</span><span class="o">.</span><span class="n">image_uri</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">tmp_person_seat_image_path</span> <span class="o">=</span> <span class="n">file_utils</span><span class="o">.</span><span class="n">resource_copy</span><span class="p">(</span>
@@ -1317,7 +1191,7 @@
             <span class="k">if</span> <span class="n">person</span><span class="o">.</span><span class="n">seat</span><span class="o">.</span><span class="n">roles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">person_role</span> <span class="ow">in</span> <span class="n">person</span><span class="o">.</span><span class="n">seat</span><span class="o">.</span><span class="n">roles</span><span class="p">:</span>
                     <span class="c1"># Create any bodies for roles</span>
-                    <span class="n">person_role_body_db_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">Body</span><span class="p">]</span>
+                    <span class="n">person_role_body_db_model</span><span class="p">:</span> <span class="n">db_models</span><span class="o">.</span><span class="n">Body</span> <span class="o">|</span> <span class="kc">None</span>
                     <span class="k">if</span> <span class="n">person_role</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="c1"># Use or default role body start_datetime</span>
                         <span class="k">if</span> <span class="n">person_role</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">start_datetime</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1368,7 +1242,7 @@
 <span class="k">def</span> <span class="nf">_calculate_in_majority</span><span class="p">(</span>
     <span class="n">vote</span><span class="p">:</span> <span class="n">ingestion_models</span><span class="o">.</span><span class="n">Vote</span><span class="p">,</span>
     <span class="n">event_minutes_item</span><span class="p">:</span> <span class="n">ingestion_models</span><span class="o">.</span><span class="n">EventMinutesItem</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
     <span class="c1"># Voted to Approve or Approve-by-abstention-or-absence</span>
     <span class="k">if</span> <span class="n">vote</span><span class="o">.</span><span class="n">decision</span> <span class="ow">in</span> <span class="p">[</span>
         <span class="n">db_constants</span><span class="o">.</span><span class="n">VoteDecision</span><span class="o">.</span><span class="n">APPROVE</span><span class="p">,</span>
@@ -1393,10 +1267,10 @@
     <span class="k">return</span> <span class="kc">None</span>
 
 
-<span class="nd">@task</span>
-<span class="k">def</span> <span class="nf">store_event_processing_results</span><span class="p">(</span>
+<span class="nd">@task</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">retry_delay</span><span class="o">=</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">60</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">store_event_processing_results</span><span class="p">(</span>  <span class="c1"># noqa: C901</span>
     <span class="n">event</span><span class="p">:</span> <span class="n">EventIngestionModel</span><span class="p">,</span>
-    <span class="n">session_processing_results</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SessionProcessingResult</span><span class="p">],</span>
+    <span class="n">session_processing_results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SessionProcessingResult</span><span class="p">],</span>
     <span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -1534,7 +1408,7 @@
         <span class="p">)</span>
 
     <span class="c1"># Add event metadata</span>
-    <span class="n">processed_person_upload_cache</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">db_models</span><span class="o">.</span><span class="n">Person</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">processed_person_upload_cache</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">db_models</span><span class="o">.</span><span class="n">Person</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">event_minutes_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">emi_index</span><span class="p">,</span> <span class="n">event_minutes_item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">event_minutes_items</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">event_minutes_item</span><span class="o">.</span><span class="n">matter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1778,7 +1652,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2022
+                Copyright &#169; 2023
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -1786,9 +1660,7 @@
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -1801,10 +1673,8 @@
     </aside>
   </div>
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/scripts/furo.js"></script>
     <script src="../../../_static/clipboard.min.js"></script>
     <script src="../../../_static/copybutton.js"></script>

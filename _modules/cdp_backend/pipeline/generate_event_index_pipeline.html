@@ -4,10 +4,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
 
-    <meta name="generator" content="sphinx-5.1.1, furo 2022.09.15"/>
-        <title>cdp_backend.pipeline.generate_event_index_pipeline - cdp-backend 0.1.dev1+gab3a65d documentation</title>
+    <!-- Generated with Sphinx 6.1.3 and Furo 2022.12.07 -->
+        <title>cdp_backend.pipeline.generate_event_index_pipeline - cdp-backend 0.1.dev1+gf63a343 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=91d0f0d1c444bdcb17a68e833c7a53903343c195" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">cdp-backend 0.1.dev1+gab3a65d documentation</div></a>
+      <a href="../../../index.html"><div class="brand">cdp-backend 0.1.dev1+gf63a343 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,10 +146,10 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
   
-  <span class="sidebar-brand-text">cdp-backend 0.1.dev1+gab3a65d documentation</span>
+  <span class="sidebar-brand-text">cdp-backend 0.1.dev1+gf63a343 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -215,7 +215,8 @@
         <article role="main">
           <h1>Source code for cdp_backend.pipeline.generate_event_index_pipeline</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
-<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">math</span>
@@ -224,7 +225,7 @@
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">TemporaryDirectory</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">NamedTuple</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">pytz</span>
@@ -252,8 +253,8 @@
 
 
 <span class="nd">@task</span>
-<span class="k">def</span> <span class="nf">get_transcripts</span><span class="p">(</span><span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">Transcript</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">get_transcripts</span><span class="p">(</span><span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">Transcript</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize fireo connection and pull all Transcript models.</span>
 
 <span class="sd">    Parameters</span>
@@ -284,9 +285,9 @@
 
 <span class="nd">@task</span>
 <span class="k">def</span> <span class="nf">get_highest_confidence_transcript_for_each_session</span><span class="p">(</span>
-    <span class="n">transcripts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">Transcript</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">Transcript</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="n">transcripts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">Transcript</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">Transcript</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Filter down a list transcript documents to just a single transcript</span>
 <span class="sd">    per session taking the highest confidence transcript document.</span>
 
@@ -304,7 +305,7 @@
     <span class="c1"># We can&#39;t use pandas groupby because sessions objects can&#39;t be naively compared</span>
     <span class="c1"># Instead we create a Dict of session id to document model</span>
     <span class="c1"># We update as we iterate through list of all transcripts</span>
-    <span class="n">selected_transcripts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">selected_transcripts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">transcript</span> <span class="ow">in</span> <span class="n">transcripts</span><span class="p">:</span>
         <span class="n">referenced_session_id</span> <span class="o">=</span> <span class="n">transcript</span><span class="o">.</span><span class="n">session_ref</span><span class="o">.</span><span class="n">ref</span><span class="o">.</span><span class="n">id</span>
         <span class="k">if</span> <span class="n">referenced_session_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selected_transcripts</span><span class="p">:</span>
@@ -324,19 +325,19 @@
 <div class="viewcode-block" id="EventTranscripts"><a class="viewcode-back" href="../../../cdp_backend.pipeline.html#cdp_backend.pipeline.generate_event_index_pipeline.EventTranscripts">[docs]</a><span class="k">class</span> <span class="nc">EventTranscripts</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
     <span class="n">event_id</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">event_datetime</span><span class="p">:</span> <span class="n">datetime</span>
-    <span class="n">transcript_db_files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">File</span><span class="p">]</span></div>
+    <span class="n">transcript_db_files</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">File</span><span class="p">]</span></div>
 
 
 <span class="nd">@task</span>
 <span class="k">def</span> <span class="nf">get_transcripts_per_event</span><span class="p">(</span>
-    <span class="n">transcripts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">Transcript</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">EventTranscripts</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+    <span class="n">transcripts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">db_models</span><span class="o">.</span><span class="n">Transcript</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">EventTranscripts</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Group all transcripts related to a single event together into</span>
 <span class="sd">    EventTranscripts objects.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Create event transcripts as event id mapped to EventTranscripts object</span>
-    <span class="n">event_transcripts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EventTranscripts</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">event_transcripts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">EventTranscripts</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">transcript</span> <span class="ow">in</span> <span class="n">transcripts</span><span class="p">:</span>
         <span class="c1"># Add new event</span>
         <span class="n">session</span> <span class="o">=</span> <span class="n">transcript</span><span class="o">.</span><span class="n">session_ref</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -361,7 +362,7 @@
 <span class="k">class</span> <span class="nc">SentenceManager</span><span class="p">(</span><span class="n">DataClassJsonMixin</span><span class="p">):</span>
     <span class="n">original_details</span><span class="p">:</span> <span class="n">Sentence</span>
     <span class="n">cleaned_text</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">n_grams</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span></div>
+    <span class="n">n_grams</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span></div>
 
 
 <div class="viewcode-block" id="ContextualizedGram"><a class="viewcode-back" href="../../../cdp_backend.pipeline.html#cdp_backend.pipeline.generate_event_index_pipeline.ContextualizedGram">[docs]</a><span class="nd">@dataclass</span>
@@ -378,8 +379,8 @@
 <span class="nd">@task</span>
 <span class="k">def</span> <span class="nf">read_transcripts_and_generate_grams</span><span class="p">(</span>
     <span class="n">event_transcripts</span><span class="p">:</span> <span class="n">EventTranscripts</span><span class="p">,</span> <span class="n">n_grams</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ContextualizedGram</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ContextualizedGram</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parse all documents and create a list of contextualized grams for later weighting.</span>
 
 <span class="sd">    Parameters</span>
@@ -399,7 +400,7 @@
     <span class="n">fs</span> <span class="o">=</span> <span class="n">GCSFileSystem</span><span class="p">(</span><span class="n">token</span><span class="o">=</span><span class="n">credentials_file</span><span class="p">)</span>
 
     <span class="c1"># Store all n_gram results</span>
-    <span class="n">event_n_grams</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ContextualizedGram</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">event_n_grams</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ContextualizedGram</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="c1"># Iter over each transcript</span>
     <span class="k">for</span> <span class="n">transcript_db_file</span> <span class="ow">in</span> <span class="n">event_transcripts</span><span class="o">.</span><span class="n">transcript_db_files</span><span class="p">:</span>
@@ -414,11 +415,11 @@
             <span class="p">)</span>
 
             <span class="c1"># Init transcript</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_transcript_filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">open_f</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_transcript_filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">open_f</span><span class="p">:</span>
                 <span class="n">transcript</span> <span class="o">=</span> <span class="n">Transcript</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">open_f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
             <span class="c1"># Get cleaned sentences by removing stop words</span>
-            <span class="n">cleaned_sentences</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SentenceManager</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">cleaned_sentences</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SentenceManager</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">SentenceManager</span><span class="p">(</span>
                     <span class="n">original_details</span><span class="o">=</span><span class="n">sentence</span><span class="p">,</span>
                     <span class="n">cleaned_text</span><span class="o">=</span><span class="n">string_utils</span><span class="o">.</span><span class="n">clean_text</span><span class="p">(</span>
@@ -498,11 +499,9 @@
 
 <span class="nd">@task</span>
 <span class="k">def</span> <span class="nf">convert_all_n_grams_to_dataframe</span><span class="p">(</span>
-    <span class="n">all_events_n_grams</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">ContextualizedGram</span><span class="p">]],</span>
+    <span class="n">all_events_n_grams</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">ContextualizedGram</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Flatten all n grams from all events into one single dataframe.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flatten all n grams from all events into one single dataframe.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="n">n_gram</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
@@ -517,7 +516,7 @@
     <span class="n">n_grams</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">datetime_weighting_days_decay</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute term frequencies, inverse document frequencies, tfidf, and weighted tfidf</span>
 <span class="sd">    values for each n_gram in the dataframe.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -530,11 +529,11 @@
     <span class="n">n_grams</span> <span class="o">=</span> <span class="n">n_grams</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">([</span><span class="s2">&quot;event_id&quot;</span><span class="p">,</span> <span class="s2">&quot;stemmed_gram&quot;</span><span class="p">])</span>
 
     <span class="c1"># Get idf</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_grams</span><span class="o">.</span><span class="n">event_id</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_grams</span><span class="o">.</span><span class="n">event_id</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
     <span class="n">n_grams</span><span class="p">[</span><span class="s2">&quot;idf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">n_grams</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;stemmed_gram&quot;</span><span class="p">)</span>
         <span class="o">.</span><span class="n">event_id</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span>
-        <span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span> <span class="o">/</span> <span class="n">df</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="n">df</span><span class="p">))</span>
     <span class="p">)</span>
 
     <span class="c1"># Store tfidf</span>
@@ -544,14 +543,14 @@
     <span class="n">n_grams</span> <span class="o">=</span> <span class="n">n_grams</span><span class="p">[</span><span class="n">n_grams</span><span class="o">.</span><span class="n">tfidf</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># Add datetime weighted tfidf</span>
-    <span class="n">UTCNOW</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
-    <span class="n">UTCNOW</span> <span class="o">=</span> <span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="s2">&quot;UTC&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span><span class="n">UTCNOW</span><span class="p">)</span>
+    <span class="n">utcnow</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+    <span class="n">utcnow</span> <span class="o">=</span> <span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="s2">&quot;UTC&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span><span class="n">utcnow</span><span class="p">)</span>
     <span class="n">n_grams</span><span class="p">[</span><span class="s2">&quot;datetime_weighted_tfidf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_grams</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
         <span class="c1"># Unit of decay is in months (`/ 30`)</span>
         <span class="c1"># `+ 2` protects against divison by zero</span>
         <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">tfidf</span>
         <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
-            <span class="p">((</span><span class="n">UTCNOW</span> <span class="o">-</span> <span class="n">row</span><span class="o">.</span><span class="n">event_datetime</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="o">/</span> <span class="n">datetime_weighting_days_decay</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
+            <span class="p">((</span><span class="n">utcnow</span> <span class="o">-</span> <span class="n">row</span><span class="o">.</span><span class="n">event_datetime</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="o">/</span> <span class="n">datetime_weighting_days_decay</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
         <span class="p">),</span>
         <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="p">)</span>
@@ -566,10 +565,10 @@
     <span class="n">credentials_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">bucket_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ngrams_per_chunk</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50_000</span><span class="p">,</span>
-    <span class="n">storage_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;index/&quot;</span><span class="p">),</span>
+    <span class="n">storage_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">=</span> <span class="s2">&quot;index/&quot;</span><span class="p">,</span>
     <span class="n">store_remote</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Split the large n_grams dataframe into multiple lists of IndexedEventGram models</span>
 <span class="sd">    for batched, mapped, upload.</span>
 
@@ -599,6 +598,7 @@
                 <span class="n">bucket</span><span class="o">=</span><span class="n">bucket_name</span><span class="p">,</span>
                 <span class="n">filepath</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">local_chunk_path</span><span class="p">),</span>
                 <span class="n">save_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">REMOTE_INDEX_CHUNK_DIR</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">save_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
 
 
@@ -608,7 +608,7 @@
     <span class="n">ngrams_per_chunk</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50_000</span><span class="p">,</span>
     <span class="n">store_remote</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Flow</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create the Prefect Flow object to preview, run, or visualize for indexing</span>
 <span class="sd">    all events in the database.</span>
 
@@ -617,8 +617,9 @@
 <span class="sd">    config: EventIndexPipelineConfig</span>
 <span class="sd">        Configuration options for the pipeline.</span>
 <span class="sd">    n_grams: int</span>
-<span class="sd">        N number of terms to act as a unique entity. Default: 1</span>
-<span class="sd">    ngrams_per_chunks: int</span>
+<span class="sd">        N number of terms to act as a unique entity.</span>
+<span class="sd">        Default: 1</span>
+<span class="sd">    ngrams_per_chunk: int</span>
 <span class="sd">        The number of ngrams to store in a single chunk file.</span>
 <span class="sd">        Default: 50_000</span>
 <span class="sd">    store_remote: bool</span>
@@ -703,7 +704,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2022
+                Copyright &#169; 2023
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -711,9 +712,7 @@
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -726,10 +725,8 @@
     </aside>
   </div>
 </div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/scripts/furo.js"></script>
     <script src="../../../_static/clipboard.min.js"></script>
     <script src="../../../_static/copybutton.js"></script>
